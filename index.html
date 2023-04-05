@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link data-trunk rel="rust" data-wasm-opt="z"/>
+        <link data-trunk rel="inline" type="js" href="/static/wasm_exec.js"/>
+		<link data-trunk rel="inline" type="js" href="/static/lnc.js"/>
+		<link data-trunk rel="inline" href="/static/jquery.min.js"/>
+        <link data-trunk rel="copy-file" href="/static/wasm-client.wasm"/>
+	    <meta charset="utf-8">
+    <title>Lightning Node Connect WASM client example</title>
+</head>
+
+<body>
+<!--
+Add the following polyfill for Microsoft Edge 17/18 support:
+<script src="https://cdn.jsdelivr.net/npm/text-encoding@0.7.0/lib/encoding.min.js"></script>
+(see https://caniuse.com/#feat=textencoder)
+-->
+<h4>Choose a namespace to initiate the client with:</h4>
+<label for="namespace">Namespace: </label>
+<input id="namespace" type="text" size="50" maxlength="50" value="default"><br />
+<button onClick="initClient();" id="initClient">Initiate the client</button>
+<button onClick="clearStorage();" id="clearStorage">Delete all stored session info</button><br /><br />
+
+<div id="passphrase" style="display:none">
+    <h4>Now connect to the server with the session passphrase</h4>
+    <label for="phrase">Passphrase: </label>
+    <input id="phrase" type="text" size="50" maxlength="255"><br />
+    <label for="server">Server: </label>
+    <input id="server" type="text" size="50" maxlength="255"
+           value="mailbox.terminal.lightning.today:443"><br />
+    <button onClick="connectServer();" id="runButton" disabled>Connect to server
+    </button>
+</div>
+
+<br />
+
+<h4 id="status"></h4>
+
+<h4 id="expiry"></h4>
+
+<h4 id="sessiontype"></h4>
+
+<button onClick="disconnect();" id="disconnectBtn" disabled>Disconnect</button>
+<button onClick="connectServer();" id="reconnectBtn" disabled>Reconnect</button>
+
+<br />
+
+<div id="ready" style="display:none">
+    <pre id="output">
+    </pre>
+
+    <h2>LND</h2>
+    <button id="getinfo" onClick="callWASM('GetInfo', '{}');" disabled>GetInfo</button>
+    <button id="listchannels" onClick="callWASM('ListChannels', '{}');" disabled>ListChannels</button>
+    <button id="listpeers" onClick="callWASM('ListPeers', '{}');" disabled>ListPeers</button>
+    <button id="walletbalance" onClick="callWASM('WalletBalance', '{}');" disabled>WalletBalance</button>
+    <button id="newaddr1" onClick="callWASM('NewAddress', '{&quot;type&quot;:&quot;WITNESS_PUBKEY_HASH&quot;}');" disabled>
+        New P2WKH address
+    </button>
+    <button id="newaddr2" onClick="callWASM('NewAddress', '{&quot;type&quot;:&quot;NESTED_PUBKEY_HASH&quot;}');" disabled>
+        New NP2WKH address
+    </button>
+    <button id="subscribetx" onClick="callWASM('SubscribeTransactions', '{}');" disabled>
+        SubscribeTransactions
+    </button>
+    <p>Sub-servers</p>
+    <button id="autopilotrpc" onClick="callWASMDirect('autopilotrpc.Autopilot.Status', '{}');" disabled>Status</button>
+    <button id="chainrpc" onClick="callWASMDirect('chainrpc.ChainNotifier.RegisterBlockEpochNtfn', '{}');" disabled>RegisterBlockEpochNtfn</button>
+    <button id="invoicesrpc" onClick="callWASMDirect('invoicesrpc.Invoices.AddHoldInvoice', '{}');" disabled>AddHoldInvoice</button>
+    <button id="routerrpc" onClick="callWASMDirect('routerrpc.Router.GetMissionControlConfig', '{}');" disabled>GetMissionControlConfig</button>
+    <button id="signrpc" onClick="callWASMDirect('signrpc.Signer.SignMessage', '{}');" disabled>SignMessage</button>
+    <button id="lnrpc" onClick="callWASMDirect('lnrpc.State.GetState', '{}');" disabled>GetState</button>
+    <button id="walletrpc" onClick="callWASMDirect('walletrpc.WalletKit.ListUnspent', '{}');" disabled>ListUnspent</button>
+    <button id="watchtowerrpc" onClick="callWASMDirect('watchtowerrpc.Watchtower.GetInfo', '{}');" disabled>GetInfo</button>
+    <button id="wtclientrpc" onClick="callWASMDirect('wtclientrpc.WatchtowerClient.ListTowers', '{}');" disabled>ListTowers</button>
+
+    <h2>Loop</h2>
+    <button id="loopoutterms" onClick="callWASMLoop('LoopOutTerms', '{}');" disabled>LoopOutTerms</button>
+
+    <h2>Pool</h2>
+    <button id="poolinfo" onClick="callWASMPool('GetInfo', '{}');" disabled>GetInfo</button>
+    
+    <h2>Faraday</h2>
+    <button id="revenuereport" onClick="callWASMFaraday('RevenueReport', '{}');" disabled>RevenueReport</button>
+
+    <h2>Autopilot</h2>
+    <button id="autopilotfeatures" onClick="callWASMAutopilot('ListAutopilotFeatures', '{}');" disabled>ListAutopilotFeatures</button>
+    <button id="autopilotsessions" onClick="callWASMAutopilot('ListAutopilotSessions', '{}');" disabled>ListAutopilotSessions</button>
+    <button id="litactions" onClick="callWASMLit('ListActions', '{}');" disabled>ListActions</button>
+
+    <pre id="autopilotfeed">
+    </pre>
+</div>
+</body>
+</html>
